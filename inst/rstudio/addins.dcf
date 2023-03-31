@@ -1,0 +1,24 @@
+Name: Document Code
+Description: Use GPT to add roxygen2 style code to selected code.
+Binding: document_code
+Interactive: true
+
+Name: Annotate Code
+Description: Use GPT to add inline comments explaining R code.
+Binding: annotate_code
+Interactive: true
+
+Name: Explain Code
+Description: Use GPT explain selected code.
+Binding: explain_code
+Interactive: true
+
+Name: Write Test
+Description: Use GPT to write unit test.
+Binding: test_function
+Interactive: true
+
+Name: Tutorialise Code
+Description: Use GPT to turn code into a tutorial.
+Binding: tutorialise_addin
+Interactive: true
