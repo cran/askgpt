@@ -10,8 +10,6 @@
 #'   focused and deterministic).
 #' @param max_tokens The maximum number of tokens to generate in the completion.
 #'   2048L is the maximum the models accept.
-#' @param stream logical value to indicate whether the response should be
-#'   streamed.
 #' @param api_key set the API key. If NULL, looks for the env OPENAI_API_KEY.
 #' @param ... additional parameters to be passed to the API (see [the API
 #'   documentation](https://platform.openai.com/docs/api-reference/completions)
@@ -25,7 +23,6 @@
 #'      \item{the model used by default is "text-davinci-003"}
 #'      \item{the default temperature is 0.2}
 #'      \item{the default for max_tokens is 2048L}
-#'      \item{the default for stream is FALSE}
 #'   }
 #'
 #'   You can configure how \code{\link{askgpt}} makes requests by setting
@@ -47,19 +44,18 @@ completions_api <- function(prompt,
                             model = NULL,
                             temperature = NULL,
                             max_tokens = NULL,
-                            stream = NULL,
                             api_key = NULL,
                             ...) {
 
   model <- model %||% getOption("askgpt_completions_model") %||% "text-davinci-003"
   temperature <- temperature %||% getOption("askgpt_temperature") %||% 0.2
   max_tokens <- max_tokens %||% getOption("askgpt_max_tokens") %||% 2048L
-  stream <- stream %||% getOption("askgpt_stream") %||% FALSE
   api_key <- api_key %||% login()
 
   # collect additional options
   params <- list(...)
 
+  if (!is.null(params$stream)) cli::cli_warn("The streaming feature has been removed from the package.")
   # Todo: find more elegant way to remove these
   params$hist <- NULL
   params$config <- NULL
@@ -75,8 +71,7 @@ completions_api <- function(prompt,
     model = model,
     prompt = prompt,
     temperature = temperature,
-    max_tokens = max_tokens,
-    stream = stream
+    max_tokens = max_tokens
   ), params)
 
   body <- Filter(Negate(is.null), body)
@@ -88,16 +83,12 @@ completions_api <- function(prompt,
       "Authorization" = glue::glue("Bearer {api_key}")
     ) |>
     httr2::req_body_json(body)
-  if (stream) {
-    the$temp_response <- NULL
-    resp <- httr2::req_stream(req, stream_response)
-    # for conformity with regular response
-    resp <- list(choices = list(list(text = the$temp_response)))
-  } else {
-    resp <- httr2::req_perform(req) |>
+
+  resp <- httr2::req_perform(req) |>
       httr2::resp_body_json()
-  }
+
   resp$call <- req
+  resp$api <- "completions"
   return(resp)
 }
 
@@ -123,18 +114,17 @@ chat_api <- function(prompt,
                      model = NULL,
                      config = NULL,
                      max_tokens = NULL,
-                     stream = NULL,
                      api_key = NULL,
                      ...) {
 
   model <- model %||% getOption("askgpt_chat_model") %||% "gpt-3.5-turbo"
   config <- config %||% getOption("askgpt_config")
   max_tokens <- max_tokens %||% getOption("askgpt_max_tokens") %||% 2048L
-  stream <- stream %||% getOption("askgpt_stream") %||% FALSE
   api_key <- api_key %||% login()
 
   # collect additional options
   params <- list(...)
+  if (!is.null(params$stream)) cli::cli_warn("The streaming feature has been removed from the package.")
   askopts <- grep("^askgpt_", names(.Options), value = TRUE) |>
     setdiff(c("askgpt_chat_model", "askgpt_key", "askgpt_config",
               "askgpt_temperature", "askgpt_max_tokens", "askgpt_stream"))
@@ -151,7 +141,7 @@ chat_api <- function(prompt,
     if (length(hist) > 0) data.frame(role = c("user", "assistant"),
                                      content = hist),
     if (!methods::is(prompt, "data.frame")) data.frame(role = "user",
-                                              content = prompt) else prompt
+                                                       content = prompt) else prompt
   ))
 
   body <- c(list(
@@ -168,38 +158,18 @@ chat_api <- function(prompt,
       "Content-Type" = "application/json",
       "Authorization" = glue::glue("Bearer {api_key}")
     ) |>
-    httr2::req_body_json(body)
+    httr2::req_body_json(body) |>
+    httr2::req_error(body = error_body)
 
-  if (stream) {
-    the$temp_response <- NULL
-    resp <- httr2::req_stream(req, stream_response)
-    # for conformity with regular response
-    resp <- list(choices = list(list(text = the$temp_response)))
-  } else {
-    resp <- httr2::req_perform(req) |>
-      httr2::resp_body_json()
-  }
+  resp <- httr2::req_perform(req) |>
+    httr2::resp_body_json()
   resp$call <- req
+  resp$api <- "chat"
   return(resp)
 }
 
-stream_response <- function(x) {
-  res <- rawToChar(x)
-  if (grepl("^\\{\\n\\s*\"error\":\\s*\\{", res)) {
-
-    error <- jsonlite::fromJSON(res)
-    cli::cli_abort("API returned an error: {error$error$message} [{error$error$type}]")
-
-  } else {
-
-    response <- gsub("data: ", "", res, fixed = TRUE)
-    response <- gsub("[DONE]", "", response, fixed = TRUE)
-    response <- jsonlite::stream_in(textConnection(response),  verbose = FALSE)
-    response <- paste(sapply(response[["choices"]], `[[`, "text"), collapse = "")
-    the$temp_response <- c(the$temp_response, response)
-    cli::cli_inform(c(trimws(response)))
-
-  }
+error_body <- function(resp) {
+  httr2::resp_body_json(resp)$error$message
 }
 
 

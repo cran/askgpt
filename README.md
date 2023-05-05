@@ -1,17 +1,18 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# askgpt
+# askgpt <img src="man/figures/logo.png" align="right" height="139" />
 
 <!-- badges: start -->
 
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+stable](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![R-CMD-check](https://github.com/JBGruber/askgpt/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JBGruber/askgpt/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/JBGruber/askgpt/branch/main/graph/badge.svg)](https://app.codecov.io/gh/JBGruber/askgpt?branch=main)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/askgpt)](https://CRAN.R-project.org/package=askgpt)
+[![CRAN_Download_Badge](https://cranlogs.r-pkg.org/badges/grand-total/askgpt)](https://cran.r-project.org/package=askgpt)
 <!-- badges: end -->
 
 You’re new to R? You don’t quite understand the code you copied from
@@ -111,13 +112,15 @@ examples</a></video>
 
 You can configure how `askgpt` makes that start with `askgpt_*`. For
 example, to use a different model to use in `askgpt()` use
-`options(askgpt_chat_model = "gpt-3.5-turbo-0301")`. If you use the
-completions instead of the chat API (`chat = FALSE` in `askgpt()`) use
+`options(askgpt_chat_model = "gpt-3.5-turbo-0301")` (or
+`options(askgpt_chat_model = "gpt-4")` if you have beta access to the
+newer model). If you use the completions instead of the chat API
+(`chat = FALSE` in `askgpt()`) use
 `options(askgpt_completions_model = "text-curie-001")`. It does not
 matter if the API parameter is listed in the function or not. All are
 used. See the complete list
 [here](https://platform.openai.com/docs/api-reference/chat) and
-[here](https://platform.openai.com/docs/api-reference/completions)
+[here](https://platform.openai.com/docs/api-reference/completions).
 
 The most important setting, however, is `askgpt_config`. This can be
 used to configure the chat using plain English:

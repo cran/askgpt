@@ -393,13 +393,14 @@ examples</a></video>
 <p>You can configure how <code>askgpt</code> makes that start with
 <code>askgpt_*</code>. For example, to use a different model to use in
 <code>askgpt()</code> use
-<code>options(askgpt_chat_model = &quot;gpt-3.5-turbo-0301&quot;)</code>. If you
-use the completions instead of the chat API (<code>chat = FALSE</code>
-in <code>askgpt()</code>) use
+<code>options(askgpt_chat_model = &quot;gpt-3.5-turbo-0301&quot;)</code> (or
+<code>options(askgpt_chat_model = &quot;gpt-4&quot;)</code> if you have beta
+access to the newer model). If you use the completions instead of the
+chat API (<code>chat = FALSE</code> in <code>askgpt()</code>) use
 <code>options(askgpt_completions_model = &quot;text-curie-001&quot;)</code>. It
 does not matter if the API parameter is listed in the function or not.
 All are used. See the complete list <a href="https://platform.openai.com/docs/api-reference/chat">here</a> and
-<a href="https://platform.openai.com/docs/api-reference/completions">here</a></p>
+<a href="https://platform.openai.com/docs/api-reference/completions">here</a>.</p>
 <p>The most important setting, however, is <code>askgpt_config</code>.
 This can be used to configure the chat using plain English:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">options</span>(<span class="at">askgpt_config =</span> <span class="st">&quot;I&#39;m 8 years old, please explain things easily&quot;</span>)</span>
