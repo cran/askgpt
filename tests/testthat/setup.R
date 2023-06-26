@@ -16,3 +16,11 @@ cache_response <- function(req) {
   }
   return(resp)
 }
+
+
+mockcall <- function(...) {
+  list(
+    api = "chat",
+    choices = list(list(message = list(content = "test")))
+  )
+}
