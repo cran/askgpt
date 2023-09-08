@@ -60,10 +60,7 @@ completions_api <- function(prompt,
   params$hist <- NULL
   params$config <- NULL
 
-  askopts <- grep("^askgpt_", names(.Options), value = TRUE) |>
-    setdiff(c("askgpt_completions_model", "askgpt_key", "askgpt_temperature",
-              "askgpt_max_tokens", "askgpt_stream"))
-  for (par in askopts) {
+  for (par in get_askopts()) {
     params[gsub("askgpt_", "", par, fixed = TRUE)] <- getOption(par)
   }
 
@@ -125,10 +122,8 @@ chat_api <- function(prompt,
   # collect additional options
   params <- list(...)
   if (!is.null(params$stream)) cli::cli_warn("The streaming feature has been removed from the package.")
-  askopts <- grep("^askgpt_", names(.Options), value = TRUE) |>
-    setdiff(c("askgpt_chat_model", "askgpt_key", "askgpt_config",
-              "askgpt_temperature", "askgpt_max_tokens", "askgpt_stream"))
-  for (par in askopts) {
+
+  for (par in get_askopts()) {
     params[gsub("askgpt_", "", par, fixed = TRUE)] <- getOption(par)
   }
 
@@ -169,7 +164,11 @@ chat_api <- function(prompt,
 }
 
 error_body <- function(resp) {
-  httr2::resp_body_json(resp)$error$message
+  msg <- httr2::resp_body_json(resp)$error$message
+  if (httr2::resp_status(resp) == 401L) {
+    msg <- c(msg, "This error can also mean that you ran out of credit. Check https://platform.openai.com/account/usage")
+  }
+  msg
 }
 
 
